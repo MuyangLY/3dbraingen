@@ -7,6 +7,7 @@ from skimage.transform import resize
 from nilearn import surface
 import nibabel as nib
 from skimage import exposure
+import torch.nn.functional as F
 
 class BRATSdataset(Dataset):
     def __init__(self, train=True, imgtype = 'flair',is_flip=False,augmentation=True):
@@ -91,7 +92,7 @@ class BRATSdataset(Dataset):
         lab = resize(H, (sp_size,sp_size,sp_size), mode='constant')
         if self.augmentation:
             random_n = torch.rand(1)
-            random_i = 0.3*torch.rand(1)[0]+0.7
+            # random_i = 0.3*torch.rand(1)[0]+0.7
             if random_n[0] > 0.5:
                 img = np.flip(img,0)
                 lab = np.flip(lab,0)
@@ -101,9 +102,12 @@ class BRATSdataset(Dataset):
         img = (img-np.min(img))/(np.max(img)-np.min(img))
         img = 2*img-1
 
+        lab = lab.copy()
         imageout = torch.from_numpy(img).float().view(1,sp_size,sp_size,sp_size)
-        # labelout = torch.from_numpy(lab).float().view(1,sp_size,sp_size,sp_size)
-        labelout = lab.copy()
+        label = torch.from_numpy(lab).float().view(sp_size,sp_size,sp_size)
+        label_r = torch.round(label)
+        classes_max = torch.max(label_r) + 1
+        labelout = F.one_hot(label_r.long(), num_classes=int(classes_max)).permute(3, 0, 1, 2)
 
-        return imageout
 
+        return imageout, labelout
