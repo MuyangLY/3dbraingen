@@ -40,7 +40,7 @@ class Discriminator_content(nn.Module):
         self.is_dis=is_dis
         self.channel = channel
         n_class = out_class
-        self.bernoulli_warmup = 15000
+        self.bernoulli_warmup = 1000
         
         self.conv1 = nn.Conv3d(1, channel//8, kernel_size=4, stride=2, padding=1)
         self.conv2 = nn.Conv3d(channel//8, channel//4, kernel_size=4, stride=2, padding=1)

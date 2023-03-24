@@ -87,11 +87,11 @@ class BRATSdataset(Dataset):
             H = np.flip(H,1)
             H =np.flip(H,2)
         
-        sp_size = 128
-        # img = resize(B, (sp_size,sp_size,sp_size), mode='constant')
-        # lab = resize(H, (sp_size,sp_size,sp_size), mode='constant')
-        img = B
-        lab = H
+        sp_size = 64
+        img = resize(B, (sp_size,sp_size,sp_size), mode='constant')
+        lab = resize(H, (sp_size,sp_size,sp_size), mode='constant')
+        # img = B
+        # lab = H
         if self.augmentation:
             random_n = torch.rand(1)
             # random_i = 0.3*torch.rand(1)[0]+0.7
@@ -109,7 +109,7 @@ class BRATSdataset(Dataset):
         label = torch.from_numpy(lab).float()
         label_r = torch.round(label)
         classes_max = torch.max(label_r) + 1
-        labelout = F.one_hot(label_r.long(), num_classes=int(classes_max)).permute(3, 0, 1, 2)
+        labelout = F.one_hot(label_r.long(), num_classes=int(classes_max)).permute(3, 0, 1, 2).float()
         if labelout.shape[0] ==4:
             mask_zero = torch.zeros((1,sp_size,sp_size,sp_size))
             labelout = torch.cat((labelout,mask_zero), dim=0)
